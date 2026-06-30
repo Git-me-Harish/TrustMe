@@ -1,4 +1,4 @@
-# KYC Platform — Phase 1 Monorepo
+# KYC Platform Phase 1 Monorepo
 
 Production-track eKYC platform. See `docs/ARCHITECTURE.md` for the full
 design, ADRs, and the **free-tier-only service ledger**.
