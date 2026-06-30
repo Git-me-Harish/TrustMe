@@ -1,0 +1,79 @@
+.rail {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  padding: var(--space-6) 0;
+  overflow-x: auto;
+}
+
+.step {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  flex: 1;
+  min-width: 110px;
+}
+
+.marker {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: var(--color-border);
+  flex-shrink: 0;
+  position: relative;
+}
+
+.step[data-state="active"] .marker {
+  background: var(--color-verify);
+  box-shadow: 0 0 0 4px var(--color-verify-dim);
+}
+
+.step[data-state="done"] .marker {
+  background: var(--color-verify);
+}
+
+.step:not(:last-child)::after {
+  content: "";
+  flex: 1;
+  height: 1px;
+  background: var(--color-border);
+  margin-left: var(--space-2);
+}
+
+.step[data-state="done"]:not(:last-child)::after {
+  background: var(--color-verify-dim);
+}
+
+.label {
+  font-size: var(--fs-sm);
+  color: var(--color-text-secondary);
+  white-space: nowrap;
+}
+
+.step[data-state="active"] .label,
+.step[data-state="done"] .label {
+  color: var(--color-text-primary);
+}
+
+.terminal {
+  font-family: var(--font-mono);
+  font-size: var(--fs-sm);
+  padding: var(--space-2) var(--space-4);
+  border-radius: var(--radius-sm);
+  margin-left: var(--space-4);
+}
+
+.terminal[data-decision="APPROVED"] {
+  color: var(--color-approve);
+  background: rgba(52, 211, 153, 0.1);
+}
+
+.terminal[data-decision="REJECTED"] {
+  color: var(--color-reject);
+  background: rgba(248, 113, 113, 0.1);
+}
+
+.terminal[data-decision="MANUAL_REVIEW"] {
+  color: var(--color-review);
+  background: rgba(251, 191, 36, 0.1);
+}
