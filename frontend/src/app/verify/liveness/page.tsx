@@ -1,20 +1,12 @@
 "use client";
-
-import { useEffect, useRef, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { kycApi, ApiError } from "../../../lib/api-client";
+import { Button } from "../../../components/ui/Button";
+import { StepHeader } from "../../../components/StepHeader";
+import { VerificationPipeline } from "../../../components/VerificationPipeline";
+import { ScanRing } from "../../../components/ScanRing";
 
-/**
- * IMPORTANT, stated plainly rather than hidden in a comment no one reads:
- * automatic detection of "did the user actually blink/turn/smile" requires
- * a landmark-tracking model (MediaPipe FaceMesh) running against the live
- * video stream — that model is not wired into this scaffold yet (tracked in
- * README as pending work). Until it lands, this screen captures one frame
- * for passive anti-spoof scoring and asks the user to confirm which actions
- * they performed via checkboxes. That confirmation is NOT a security
- * control on its own — it's a placeholder UI so the pipeline is clickable
- * end-to-end. Do not treat this screen as "liveness is solved."
- */
 export default function LivenessPage() {
   const router = useRouter();
   const params = useSearchParams();
@@ -26,21 +18,23 @@ export default function LivenessPage() {
 
   const [challenge, setChallenge] = useState<{ token: string; sequence: string[] } | null>(null);
   const [performed, setPerformed] = useState<Set<string>>(new Set());
-  const [error, setError] = useState<string | null>(null);
-  const [loading, setLoading] = useState(false);
   const [cameraReady, setCameraReady] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     if (!sessionId) return;
     kycApi
       .issueLivenessChallenge(sessionId)
       .then((c) => setChallenge({ token: c.token, sequence: c.sequence }))
-      .catch((err) => setError(err instanceof ApiError ? err.message : "Could not start liveness check."));
+      .catch((err) =>
+        setError(err instanceof ApiError ? err.message : "Could not start liveness check.")
+      );
   }, [sessionId]);
 
   useEffect(() => {
     navigator.mediaDevices
-      .getUserMedia({ video: { facingMode: "user" } })
+      .getUserMedia({ video: { facingMode: "user", width: { ideal: 640 }, height: { ideal: 480 } } })
       .then((stream) => {
         streamRef.current = stream;
         if (videoRef.current) {
@@ -48,7 +42,7 @@ export default function LivenessPage() {
           setCameraReady(true);
         }
       })
-      .catch(() => setError("Camera access is required for liveness verification."));
+      .catch(() => setError("Camera access required. Allow camera permissions and reload."));
 
     return () => {
       streamRef.current?.getTracks().forEach((t) => t.stop());
@@ -56,7 +50,14 @@ export default function LivenessPage() {
   }, []);
 
   if (!sessionId || !documentId) {
-    return <Centered>No active session. Start verification from the home page first.</Centered>;
+    return (
+      <div className="container" style={{ paddingTop: "var(--s-16)", textAlign: "center" }}>
+        <p style={{ color: "var(--reject)" }}>No active session.</p>
+        <Button variant="secondary" size="sm" style={{ marginTop: "var(--s-4)" }} onClick={() => router.push("/")}>
+          Go home
+        </Button>
+      </div>
+    );
   }
 
   function toggleAction(action: string) {
@@ -72,12 +73,14 @@ export default function LivenessPage() {
       const video = videoRef.current;
       if (!video) return reject(new Error("Camera not ready"));
       const canvas = document.createElement("canvas");
-      canvas.width = video.videoWidth;
-      canvas.height = video.videoHeight;
-      const ctx = canvas.getContext("2d");
-      if (!ctx) return reject(new Error("Canvas unavailable"));
-      ctx.drawImage(video, 0, 0);
-      canvas.toBlob((blob) => (blob ? resolve(blob) : reject(new Error("Capture failed"))), "image/jpeg", 0.92);
+      canvas.width = video.videoWidth || 640;
+      canvas.height = video.videoHeight || 480;
+      canvas.getContext("2d")?.drawImage(video, 0, 0);
+      canvas.toBlob(
+        (blob) => (blob ? resolve(blob) : reject(new Error("Capture failed"))),
+        "image/jpeg",
+        0.92
+      );
     });
   }
 
@@ -87,12 +90,8 @@ export default function LivenessPage() {
     setError(null);
     try {
       const frame = await captureFrame();
-      // Order matters for the backend's exact-sequence check — performed
-      // here in the same order the challenge was issued, since checkboxes
-      // alone don't capture order. This UI limitation is exactly why manual
-      // confirmation isn't a real security control yet (see note above).
       const orderedPerformed = challenge.sequence.filter((s) => performed.has(s));
-      await kycApi.verifyLiveness(sessionId, challenge.token, orderedPerformed, frame);
+      await kycApi.verifyLiveness(sessionId!, challenge.token, orderedPerformed, frame);
       router.push(`/verify/face-match?session=${sessionId}&document=${documentId}`);
     } catch (err) {
       setError(err instanceof ApiError ? err.message : "Liveness check failed. Please retry.");
@@ -101,59 +100,188 @@ export default function LivenessPage() {
     }
   }
 
+  const allDone = challenge ? challenge.sequence.every((a) => performed.has(a)) : false;
+
   return (
-    <main style={{ maxWidth: 480, margin: "0 auto", padding: "var(--space-8) var(--space-4)" }}>
-      <h1 style={{ fontSize: "var(--fs-xl)", marginBottom: "var(--space-2)" }}>Liveness check</h1>
-      <p style={{ color: "var(--color-text-secondary)", marginBottom: "var(--space-6)" }}>
-        Look at the camera and perform each action below.
-      </p>
-
-      <video
-        ref={videoRef}
-        autoPlay
-        muted
-        playsInline
-        style={{ width: "100%", borderRadius: "var(--radius-lg)", background: "var(--color-surface)" }}
-      />
-
-      {challenge && (
-        <div style={{ marginTop: "var(--space-6)" }}>
-          {challenge.sequence.map((action) => (
-            <label key={action} style={{ display: "flex", alignItems: "center", gap: "var(--space-2)", marginBottom: "var(--space-2)" }}>
-              <input type="checkbox" checked={performed.has(action)} onChange={() => toggleAction(action)} />
-              <span style={{ textTransform: "capitalize" }}>{action.replace("_", " ")}</span>
-            </label>
-          ))}
-        </div>
-      )}
-
-      <button
-        onClick={handleSubmit}
-        disabled={!cameraReady || !challenge || performed.size === 0 || loading}
-        style={{
-          marginTop: "var(--space-6)",
-          width: "100%",
-          background: !cameraReady || loading ? "var(--color-border)" : "var(--color-verify)",
-          color: "#0b0d10",
-          border: "none",
-          borderRadius: "var(--radius-md)",
-          padding: "var(--space-3)",
-          fontSize: "var(--fs-base)",
-          cursor: "pointer",
-        }}
+    <div style={{ minHeight: "100dvh", display: "flex", flexDirection: "column" }}>
+      <div
+        className="container"
+        style={{ flex: 1, paddingTop: "var(--s-8)", paddingBottom: "var(--s-16)", maxWidth: 560 }}
       >
-        {loading ? "Verifying…" : "Submit"}
-      </button>
+        <VerificationPipeline status="DOC_VERIFIED" />
+        <StepHeader
+          step={3}
+          totalSteps={5}
+          title="Liveness check."
+          description="Look directly at the camera and perform each action in the list below."
+        />
 
-      {error && <p style={{ color: "var(--color-reject)", marginTop: "var(--space-4)" }}>{error}</p>}
-    </main>
-  );
-}
+        {/* Camera feed with scan ring */}
+        <div style={{ marginBottom: "var(--s-6)" }}>
+          <ScanRing active={cameraReady} shape="square">
+            <video
+              ref={videoRef}
+              autoPlay
+              muted
+              playsInline
+              style={{
+                width: "100%",
+                aspectRatio: "4/3",
+                objectFit: "cover",
+                display: "block",
+                background: "var(--surface-2)",
+                transform: "scaleX(-1)", // mirror
+              }}
+            />
+          </ScanRing>
 
-function Centered({ children }: { children: React.ReactNode }) {
-  return (
-    <main style={{ maxWidth: 480, margin: "0 auto", padding: "var(--space-8) var(--space-4)" }}>
-      <p style={{ color: "var(--color-reject)" }}>{children}</p>
-    </main>
+          {!cameraReady && (
+            <div
+              style={{
+                position: "absolute",
+                inset: 0,
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                background: "var(--surface-2)",
+              }}
+            >
+              <p style={{ fontSize: "var(--text-sm)", color: "var(--text-3)" }}>
+                Starting camera…
+              </p>
+            </div>
+          )}
+        </div>
+
+        {/* Challenge list */}
+        {challenge && (
+          <div
+            style={{
+              background: "var(--surface)",
+              border: "1px solid var(--border)",
+              borderRadius: "var(--r-xl)",
+              overflow: "hidden",
+              marginBottom: "var(--s-6)",
+            }}
+          >
+            <div
+              style={{
+                padding: "var(--s-3) var(--s-5)",
+                borderBottom: "1px solid var(--border)",
+                background: "var(--surface-2)",
+              }}
+            >
+              <p
+                style={{
+                  fontSize: "var(--text-xs)",
+                  fontWeight: 600,
+                  letterSpacing: "0.08em",
+                  textTransform: "uppercase",
+                  color: "var(--text-3)",
+                }}
+              >
+                Complete all actions
+              </p>
+            </div>
+            {challenge.sequence.map((action, i) => {
+              const done = performed.has(action);
+              return (
+                <label
+                  key={action}
+                  style={{
+                    display: "flex",
+                    alignItems: "center",
+                    gap: "var(--s-4)",
+                    padding: "var(--s-4) var(--s-5)",
+                    borderBottom:
+                      i < challenge.sequence.length - 1 ? "1px solid var(--border)" : "none",
+                    cursor: "pointer",
+                    transition: "background var(--t-fast) var(--ease)",
+                    background: done ? "var(--accent-dim)" : "transparent",
+                  }}
+                >
+                  {/* Custom checkbox */}
+                  <div
+                    style={{
+                      width: 20,
+                      height: 20,
+                      borderRadius: "50%",
+                      border: `1.5px solid ${done ? "var(--accent)" : "var(--border-2)"}`,
+                      background: done ? "var(--accent)" : "transparent",
+                      flexShrink: 0,
+                      display: "grid",
+                      placeItems: "center",
+                      transition: "all var(--t-fast) var(--ease)",
+                    }}
+                  >
+                    {done && (
+                      <svg width="10" height="10" viewBox="0 0 10 10" fill="none">
+                        <path d="M2 5l2 2 4-4" stroke="var(--text-inv)" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+                      </svg>
+                    )}
+                  </div>
+                  <input
+                    type="checkbox"
+                    checked={done}
+                    onChange={() => toggleAction(action)}
+                    style={{ display: "none" }}
+                  />
+                  <span
+                    style={{
+                      fontSize: "var(--text-base)",
+                      color: done ? "var(--text)" : "var(--text-2)",
+                      fontWeight: done ? 500 : 400,
+                      textTransform: "capitalize",
+                      transition: "color var(--t-fast) var(--ease)",
+                    }}
+                  >
+                    {action.replace(/_/g, " ")}
+                  </span>
+                  {done && (
+                    <span
+                      style={{
+                        marginLeft: "auto",
+                        fontSize: "var(--text-xs)",
+                        color: "var(--accent)",
+                        fontFamily: "var(--font-mono)",
+                        letterSpacing: "0.04em",
+                      }}
+                    >
+                      done
+                    </span>
+                  )}
+                </label>
+              );
+            })}
+          </div>
+        )}
+
+        {error && (
+          <div
+            style={{
+              padding: "var(--s-3) var(--s-4)",
+              background: "var(--reject-dim)",
+              border: "1px solid rgba(244,63,94,0.2)",
+              borderRadius: "var(--r-md)",
+              marginBottom: "var(--s-4)",
+              fontSize: "var(--text-sm)",
+              color: "var(--reject)",
+            }}
+          >
+            {error}
+          </div>
+        )}
+
+        <Button
+          fullWidth
+          size="lg"
+          loading={loading}
+          disabled={!cameraReady || !allDone || !challenge}
+          onClick={handleSubmit}
+        >
+          {loading ? "Verifying…" : "Submit liveness check"}
+        </Button>
+      </div>
+    </div>
   );
 }

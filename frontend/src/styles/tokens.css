@@ -1,71 +1,88 @@
-/**
- * Design tokens for the KYC platform.
- * Intent: a "trust infrastructure" visual language — precise, calm,
- * documentary rather than playful-startup. Deep ink + a single verification
- * accent (not the generic indigo-on-white every SaaS template uses), plus a
- * monospace accent font for IDs/hashes/status codes so they read as data,
- * not prose.
- */
+/* ─────────────────────────────────────────────────────────────
+   KYC Platform — Design Tokens v2
+   Deep blue-black institutional palette. One accent. No noise.
+   ───────────────────────────────────────────────────────────── */
 :root {
-  /* Surface */
-  --color-bg: #0b0d10;
-  --color-surface: #14171c;
-  --color-surface-raised: #1b1f26;
-  --color-border: #262b33;
+  /* Surfaces */
+  --bg:          #070b10;
+  --surface:     #0c1119;
+  --surface-2:   #121a25;
+  --surface-3:   #18222f;
+  --overlay:     rgba(7, 11, 16, 0.85);
+
+  /* Borders */
+  --border:      #1a2535;
+  --border-2:    #243040;
 
   /* Text */
-  --color-text-primary: #eef1f5;
-  --color-text-secondary: #9aa3b2;
-  --color-text-muted: #5b6472;
+  --text:        #dce6f0;
+  --text-2:      #6b8099;
+  --text-3:      #374d63;
+  --text-inv:    #070b10;
 
-  /* Verification accent — a controlled teal-green, distinct from generic
-     "success green"; used sparingly for verified states only */
-  --color-verify: #2dd4bf;
-  --color-verify-dim: #134e4a;
+  /* Accent — teal, not blue/purple/green defaults */
+  --accent:      #00c9a7;
+  --accent-dim:  rgba(0, 201, 167, 0.08);
+  --accent-glow: rgba(0, 201, 167, 0.25);
+  --accent-text: #00e8c2;
 
-  /* Risk states */
-  --color-approve: #34d399;
-  --color-review: #fbbf24;
-  --color-reject: #f87171;
+  /* Semantic states */
+  --approve:     #10b981;
+  --approve-dim: rgba(16, 185, 129, 0.1);
+  --review:      #f59e0b;
+  --review-dim:  rgba(245, 158, 11, 0.1);
+  --reject:      #f43f5e;
+  --reject-dim:  rgba(244, 63, 94, 0.1);
 
   /* Typography */
-  --font-sans: "Inter", -apple-system, BlinkMacSystemFont, sans-serif;
-  --font-mono: "IBM Plex Mono", "JetBrains Mono", monospace;
+  --font-sans: var(--font-inter), -apple-system, BlinkMacSystemFont, sans-serif;
+  --font-mono: var(--font-jetbrains), 'Courier New', monospace;
 
-  --fs-xs: 0.75rem;
-  --fs-sm: 0.875rem;
-  --fs-base: 1rem;
-  --fs-lg: 1.25rem;
-  --fs-xl: 1.75rem;
-  --fs-2xl: 2.5rem;
+  /* Type scale */
+  --text-xs:   0.6875rem;   /* 11px */
+  --text-sm:   0.8125rem;   /* 13px */
+  --text-base: 0.9375rem;   /* 15px */
+  --text-lg:   1.125rem;    /* 18px */
+  --text-xl:   1.375rem;    /* 22px */
+  --text-2xl:  1.75rem;     /* 28px */
+  --text-3xl:  2.5rem;      /* 40px */
+  --text-4xl:  3.5rem;      /* 56px */
+  --text-5xl:  5rem;        /* 80px */
 
-  /* Spacing scale (4px base) */
-  --space-1: 0.25rem;
-  --space-2: 0.5rem;
-  --space-3: 0.75rem;
-  --space-4: 1rem;
-  --space-6: 1.5rem;
-  --space-8: 2rem;
-  --space-12: 3rem;
+  /* Spacing (4px base) */
+  --s-1:  0.25rem;
+  --s-2:  0.5rem;
+  --s-3:  0.75rem;
+  --s-4:  1rem;
+  --s-5:  1.25rem;
+  --s-6:  1.5rem;
+  --s-8:  2rem;
+  --s-10: 2.5rem;
+  --s-12: 3rem;
+  --s-16: 4rem;
+  --s-20: 5rem;
+  --s-24: 6rem;
 
-  --radius-sm: 6px;
-  --radius-md: 10px;
-  --radius-lg: 16px;
+  /* Radius */
+  --r-sm:   4px;
+  --r-md:   8px;
+  --r-lg:   12px;
+  --r-xl:   16px;
+  --r-full: 9999px;
 
-  --shadow-card: 0 1px 2px rgba(0, 0, 0, 0.4), 0 8px 24px rgba(0, 0, 0, 0.25);
-}
+  /* Shadows */
+  --shadow-sm: 0 1px 3px rgba(0,0,0,0.4);
+  --shadow-md: 0 4px 16px rgba(0,0,0,0.4);
+  --shadow-lg: 0 8px 32px rgba(0,0,0,0.5);
+  --shadow-accent: 0 0 20px rgba(0,201,167,0.15);
 
-* {
-  box-sizing: border-box;
-}
+  /* Transitions */
+  --ease: cubic-bezier(0.16, 1, 0.3, 1);
+  --t-fast: 120ms;
+  --t-base: 200ms;
+  --t-slow: 350ms;
 
-body {
-  background: var(--color-bg);
-  color: var(--color-text-primary);
-  font-family: var(--font-sans);
-  margin: 0;
-}
-
-code, .mono {
-  font-family: var(--font-mono);
+  /* Layout */
+  --max-w: 1160px;
+  --nav-h: 64px;
 }
