@@ -1,5 +1,5 @@
 /* ─────────────────────────────────────────────────────────────
-   Global resets, base styles, animations
+   Global resets, base styles, animations — light warm theme
    ───────────────────────────────────────────────────────────── */
 
 *, *::before, *::after {
@@ -29,7 +29,7 @@ button { cursor: pointer; border: none; background: none; font: inherit; }
 input, textarea, select { font: inherit; }
 img, video { display: block; max-width: 100%; }
 
-/* Dot-grid background texture — the surface pattern */
+/* ── Warm dot grid pattern */
 .dot-bg {
   background-image: radial-gradient(circle, var(--border) 1px, transparent 1px);
   background-size: 24px 24px;
@@ -38,7 +38,7 @@ img, video { display: block; max-width: 100%; }
 /* ── Animations ─────────────────────────────────────────────── */
 
 @keyframes fade-up {
-  from { opacity: 0; transform: translateY(16px); }
+  from { opacity: 0; transform: translateY(20px); }
   to   { opacity: 1; transform: translateY(0); }
 }
 
@@ -48,79 +48,89 @@ img, video { display: block; max-width: 100%; }
 }
 
 @keyframes pulse-ring {
-  0%   { transform: scale(1);   opacity: 0.6; }
-  50%  { transform: scale(1.08); opacity: 0.25; }
-  100% { transform: scale(1);   opacity: 0.6; }
+  0%   { transform: scale(1);    opacity: 0.5; }
+  50%  { transform: scale(1.07); opacity: 0.2; }
+  100% { transform: scale(1);    opacity: 0.5; }
 }
 
 @keyframes scan-expand {
   0%   { transform: scale(0.85); opacity: 0; }
-  40%  { opacity: 0.5; }
+  40%  { opacity: 0.4; }
   100% { transform: scale(1.4);  opacity: 0; }
 }
 
-@keyframes blink-dot {
-  0%, 100% { opacity: 1; }
-  50%       { opacity: 0.3; }
+@keyframes spin {
+  to { transform: rotate(360deg); }
 }
 
 @keyframes shimmer {
-  0%   { background-position: -400px 0; }
-  100% { background-position: 400px 0; }
+  0%   { background-position: -500px 0; }
+  100% { background-position: 500px 0; }
 }
 
-@keyframes progress-fill {
-  from { width: 0; }
-  to   { width: 100%; }
+@keyframes float {
+  0%, 100% { transform: translateY(0px); }
+  50%       { transform: translateY(-10px); }
 }
 
-.animate-fade-up   { animation: fade-up  var(--t-slow) var(--ease) both; }
-.animate-fade-in   { animation: fade-in  var(--t-base) var(--ease) both; }
+@keyframes scan-sweep {
+  0%   { top: 5%; opacity: 0; }
+  10%  { opacity: 1; }
+  90%  { opacity: 1; }
+  100% { top: 95%; opacity: 0; }
+}
+
+.animate-fade-up {
+  animation: fade-up var(--t-slow) var(--ease) both;
+}
+
+.animate-fade-in {
+  animation: fade-in var(--t-base) var(--ease) both;
+}
 
 /* Staggered children */
 .stagger > *:nth-child(1) { animation-delay: 0ms; }
-.stagger > *:nth-child(2) { animation-delay: 60ms; }
-.stagger > *:nth-child(3) { animation-delay: 120ms; }
-.stagger > *:nth-child(4) { animation-delay: 180ms; }
-.stagger > *:nth-child(5) { animation-delay: 240ms; }
-.stagger > *:nth-child(6) { animation-delay: 300ms; }
+.stagger > *:nth-child(2) { animation-delay: 80ms; }
+.stagger > *:nth-child(3) { animation-delay: 160ms; }
+.stagger > *:nth-child(4) { animation-delay: 240ms; }
+.stagger > *:nth-child(5) { animation-delay: 320ms; }
+.stagger > *:nth-child(6) { animation-delay: 400ms; }
 
-/* ── Skeleton loader ─────────────────────────────────────────── */
+/* ── Skeleton */
 .skeleton {
   background: linear-gradient(
     90deg,
-    var(--surface) 0px,
-    var(--surface-2) 120px,
-    var(--surface) 240px
+    var(--surface-2) 0px,
+    var(--border) 200px,
+    var(--surface-2) 400px
   );
-  background-size: 400px 100%;
+  background-size: 500px 100%;
   animation: shimmer 1.4s infinite linear;
   border-radius: var(--r-md);
 }
 
-/* ── Focus ring ──────────────────────────────────────────────── */
+/* ── Focus ring */
 :focus-visible {
   outline: 2px solid var(--accent);
   outline-offset: 3px;
   border-radius: var(--r-sm);
 }
 
-/* ── Scrollbar ───────────────────────────────────────────────── */
-::-webkit-scrollbar { width: 6px; height: 6px; }
+/* ── Scrollbar */
+::-webkit-scrollbar { width: 5px; height: 5px; }
 ::-webkit-scrollbar-track { background: transparent; }
 ::-webkit-scrollbar-thumb {
   background: var(--border-2);
   border-radius: var(--r-full);
 }
-::-webkit-scrollbar-thumb:hover { background: var(--text-3); }
 
-/* ── Selection ───────────────────────────────────────────────── */
+/* ── Selection */
 ::selection {
-  background: var(--accent-glow);
+  background: var(--accent-dim);
   color: var(--text);
 }
 
-/* ── Reduced motion ─────────────────────────────────────────── */
+/* ── Reduced motion */
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after {
     animation-duration: 0.01ms !important;
@@ -128,16 +138,12 @@ img, video { display: block; max-width: 100%; }
   }
 }
 
-/* ── Utility: visually hidden ───────────────────────────────── */
+/* ── Utilities */
 .sr-only {
-  position: absolute;
-  width: 1px; height: 1px;
-  overflow: hidden;
-  clip: rect(0,0,0,0);
-  white-space: nowrap;
+  position: absolute; width: 1px; height: 1px;
+  overflow: hidden; clip: rect(0,0,0,0); white-space: nowrap;
 }
 
-/* ── Container ───────────────────────────────────────────────── */
 .container {
   width: 100%;
   max-width: var(--max-w);
@@ -149,7 +155,6 @@ img, video { display: block; max-width: 100%; }
   .container { padding-inline: var(--s-4); }
 }
 
-/* ── Divider ─────────────────────────────────────────────────── */
 .divider {
   height: 1px;
   background: var(--border);

@@ -16,12 +16,7 @@ export function Input({ label, hint, error, id, style, ...props }: InputProps) {
       {label && (
         <label
           htmlFor={inputId}
-          style={{
-            fontSize: "var(--text-sm)",
-            fontWeight: 500,
-            color: "var(--text-2)",
-            letterSpacing: "-0.01em",
-          }}
+          style={{ fontSize: "var(--text-sm)", fontWeight: 600, color: "var(--text)", letterSpacing: "-0.01em" }}
         >
           {label}
         </label>
@@ -32,8 +27,8 @@ export function Input({ label, hint, error, id, style, ...props }: InputProps) {
         onBlur={() => setFocused(false)}
         style={{
           width: "100%",
-          background: "var(--surface-2)",
-          border: `1px solid ${error ? "var(--reject)" : focused ? "var(--accent)" : "var(--border-2)"}`,
+          background: "var(--surface)",
+          border: `1.5px solid ${error ? "var(--reject)" : focused ? "var(--accent)" : "var(--border)"}`,
           borderRadius: "var(--r-md)",
           padding: "10px 14px",
           color: "var(--text)",
@@ -45,13 +40,7 @@ export function Input({ label, hint, error, id, style, ...props }: InputProps) {
         {...props}
       />
       {(hint || error) && (
-        <p
-          style={{
-            fontSize: "var(--text-xs)",
-            color: error ? "var(--reject)" : "var(--text-3)",
-            lineHeight: 1.5,
-          }}
-        >
+        <p style={{ fontSize: "var(--text-xs)", color: error ? "var(--reject)" : "var(--text-3)", lineHeight: 1.5 }}>
           {error ?? hint}
         </p>
       )}

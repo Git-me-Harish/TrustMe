@@ -1,5 +1,3 @@
-/* Horizontal step pipeline — state machine visualized */
-
 .container {
   padding: var(--s-2) 0 var(--s-6);
   overflow-x: auto;
@@ -14,7 +12,6 @@
   min-width: max-content;
 }
 
-/* Each step = icon + label, connected by line */
 .step {
   display: flex;
   flex-direction: column;
@@ -25,11 +22,10 @@
   min-width: 80px;
 }
 
-/* Connecting line — rendered as :before on the step AFTER position 0 */
 .step + .step::before {
   content: "";
   position: absolute;
-  top: 9px; /* center on the dot */
+  top: 9px;
   right: 50%;
   left: -50%;
   height: 1px;
@@ -38,22 +34,16 @@
   transition: background var(--t-slow) var(--ease);
 }
 
-.step[data-state="done"] + .step::before,
-.step[data-state="done"]::before {
+.step[data-state="done"] + .step::before {
   background: var(--accent);
 }
 
-.step[data-state="active"] + .step::before {
-  background: var(--border);
-}
-
-/* Dot */
 .dot {
   width: 18px;
   height: 18px;
   border-radius: 50%;
   border: 1.5px solid var(--border-2);
-  background: var(--bg);
+  background: var(--surface);
   z-index: 1;
   position: relative;
   transition: all var(--t-base) var(--ease);
@@ -65,26 +55,29 @@
   border-color: var(--accent);
 }
 
+/* Checkmark inside done dot */
 .step[data-state="done"] .dot::after {
   content: "";
   position: absolute;
-  inset: 3px;
-  background: var(--text-inv);
-  border-radius: 50%;
-  mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 10 10'%3E%3Cpath d='M2 5l2.5 2.5 3.5-4' stroke='white' stroke-width='1.5' fill='none' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
-  mask-size: cover;
-  -webkit-mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 10 10'%3E%3Cpath d='M2 5l2.5 2.5 3.5-4' stroke='white' stroke-width='1.5' fill='none' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
-  -webkit-mask-size: cover;
+  inset: 0;
+  background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 18 18'%3E%3Cpath d='M5 9l2.5 2.5 5.5-6' stroke='white' stroke-width='1.5' fill='none' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E") center/cover;
 }
 
 .step[data-state="active"] .dot {
   border-color: var(--accent);
   background: var(--accent-dim);
-  box-shadow: 0 0 0 4px var(--accent-dim), 0 0 0 6px rgba(0,201,167,0.05);
-  animation: blink-dot 2s ease infinite;
+  box-shadow: 0 0 0 4px var(--accent-dim);
 }
 
-/* Label */
+.step[data-state="active"] .dot::after {
+  content: "";
+  position: absolute;
+  inset: 4px;
+  background: var(--accent);
+  border-radius: 50%;
+  animation: pulse-ring 1.8s ease infinite;
+}
+
 .label {
   font-size: var(--text-xs);
   color: var(--text-3);
@@ -96,12 +89,8 @@
 }
 
 .step[data-state="done"] .label  { color: var(--text-2); }
-.step[data-state="active"] .label {
-  color: var(--accent-text);
-  font-weight: 500;
-}
+.step[data-state="active"] .label { color: var(--accent-text); font-weight: 600; }
 
-/* Terminal badge */
 .terminal {
   margin-left: var(--s-4);
   display: flex;
@@ -115,9 +104,6 @@
   width: 18px;
   height: 18px;
   border-radius: 50%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
 }
 
 .terminal-dot[data-decision="APPROVED"]     { background: var(--approve-dim); border: 1.5px solid var(--approve); }
@@ -129,13 +115,13 @@
   font-size: var(--text-xs);
   white-space: nowrap;
   text-align: center;
+  font-weight: 500;
 }
 
 .terminal-label[data-decision="APPROVED"]     { color: var(--approve); }
 .terminal-label[data-decision="REJECTED"]     { color: var(--reject); }
 .terminal-label[data-decision="MANUAL_REVIEW"]{ color: var(--review); }
 
-/* Mobile — collapse labels, show only dots */
 @media (max-width: 480px) {
   .step { min-width: 40px; }
   .label { display: none; }

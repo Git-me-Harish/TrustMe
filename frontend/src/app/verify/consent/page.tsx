@@ -10,14 +10,13 @@ const DATA_COLLECTED = [
   { label: "ID document photo", detail: "Used for OCR field extraction and face reference" },
   { label: "Live video frames", detail: "Liveness challenge and passive anti-spoof scoring" },
   { label: "Biometric embeddings", detail: "512-d ArcFace vectors — not stored as raw images" },
-  { label: "Geolocation timestamp", detail: "Session-level, not granular tracking" },
+  { label: "Session timestamp", detail: "For compliance audit trail only" },
 ];
 
 export default function ConsentPage() {
   const router = useRouter();
   const params = useSearchParams();
   const sessionId = params.get("session");
-
   const [agreed, setAgreed] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -25,9 +24,7 @@ export default function ConsentPage() {
   if (!sessionId) {
     return (
       <div className="container" style={{ paddingTop: "var(--s-16)", textAlign: "center" }}>
-        <p style={{ color: "var(--reject)", fontSize: "var(--text-base)" }}>
-          No active session. Start from the home page.
-        </p>
+        <p style={{ color: "var(--reject)" }}>No active session.</p>
         <Button variant="secondary" size="sm" style={{ marginTop: "var(--s-4)" }} onClick={() => router.push("/")}>
           Go home
         </Button>
@@ -50,38 +47,24 @@ export default function ConsentPage() {
   }
 
   return (
-    <div
-      style={{
-        minHeight: "100dvh",
-        display: "flex",
-        flexDirection: "column",
-      }}
-    >
-      <div
-        className="container"
-        style={{
-          flex: 1,
-          paddingTop: "var(--s-8)",
-          paddingBottom: "var(--s-16)",
-          maxWidth: 640,
-        }}
-      >
+    <div style={{ minHeight: "100dvh", background: "var(--bg)" }}>
+      <div className="container" style={{ paddingTop: "var(--s-8)", paddingBottom: "var(--s-16)", maxWidth: 640 }}>
         <VerificationPipeline status="INITIATED" />
         <StepHeader
           step={1}
           totalSteps={5}
           title="Before we collect data."
-          description="We need your explicit consent before capturing any biometric information. This is required by RBI KYC guidelines and applicable data protection law."
+          description="We need your explicit consent before capturing any biometric information. Required by RBI KYC guidelines and applicable data protection law."
         />
 
-        {/* What we collect */}
+        {/* Data collected table */}
         <div
           style={{
             background: "var(--surface)",
             border: "1px solid var(--border)",
             borderRadius: "var(--r-xl)",
             overflow: "hidden",
-            marginBottom: "var(--s-6)",
+            marginBottom: "var(--s-5)",
           }}
         >
           <div
@@ -91,15 +74,7 @@ export default function ConsentPage() {
               background: "var(--surface-2)",
             }}
           >
-            <p
-              style={{
-                fontSize: "var(--text-xs)",
-                fontWeight: 600,
-                letterSpacing: "0.08em",
-                textTransform: "uppercase",
-                color: "var(--text-3)",
-              }}
-            >
+            <p style={{ fontSize: "var(--text-xs)", fontWeight: 700, letterSpacing: "0.08em", textTransform: "uppercase", color: "var(--text-3)" }}>
               Data collected in this session
             </p>
           </div>
@@ -115,20 +90,8 @@ export default function ConsentPage() {
                 gap: "var(--s-4)",
               }}
             >
-              <span style={{ fontSize: "var(--text-sm)", color: "var(--text)", fontWeight: 500 }}>
-                {item.label}
-              </span>
-              <span
-                style={{
-                  fontSize: "var(--text-xs)",
-                  color: "var(--text-3)",
-                  textAlign: "right",
-                  maxWidth: 240,
-                  lineHeight: 1.5,
-                }}
-              >
-                {item.detail}
-              </span>
+              <span style={{ fontSize: "var(--text-sm)", color: "var(--text)", fontWeight: 600 }}>{item.label}</span>
+              <span style={{ fontSize: "var(--text-xs)", color: "var(--text-3)", textAlign: "right", maxWidth: 220, lineHeight: 1.5 }}>{item.detail}</span>
             </div>
           ))}
         </div>
@@ -137,19 +100,13 @@ export default function ConsentPage() {
         <div
           style={{
             background: "var(--accent-dim)",
-            border: "1px solid rgba(0,201,167,0.15)",
+            border: "1px solid rgba(232,84,42,0.15)",
             borderRadius: "var(--r-lg)",
             padding: "var(--s-5)",
-            marginBottom: "var(--s-6)",
+            marginBottom: "var(--s-5)",
           }}
         >
-          <p
-            style={{
-              fontSize: "var(--text-sm)",
-              color: "var(--text-2)",
-              lineHeight: 1.75,
-            }}
-          >
+          <p style={{ fontSize: "var(--text-sm)", color: "var(--text-2)", lineHeight: 1.75 }}>
             I consent to the collection and processing of my biometric data (facial image,
             liveness video frames) and identity document data for the purpose of KYC
             verification. Data will be retained for the period required by applicable
@@ -159,13 +116,7 @@ export default function ConsentPage() {
 
         {/* Checkbox */}
         <label
-          style={{
-            display: "flex",
-            alignItems: "flex-start",
-            gap: "var(--s-3)",
-            marginBottom: "var(--s-8)",
-            cursor: "pointer",
-          }}
+          style={{ display: "flex", alignItems: "flex-start", gap: "var(--s-3)", marginBottom: "var(--s-8)", cursor: "pointer" }}
         >
           <div
             role="checkbox"
@@ -174,63 +125,37 @@ export default function ConsentPage() {
             onClick={() => setAgreed(!agreed)}
             onKeyDown={(e) => e.key === " " && setAgreed(!agreed)}
             style={{
-              width: 18,
-              height: 18,
-              marginTop: 2,
-              flexShrink: 0,
+              width: 18, height: 18, marginTop: 2, flexShrink: 0,
               borderRadius: "var(--r-sm)",
               border: `1.5px solid ${agreed ? "var(--accent)" : "var(--border-2)"}`,
-              background: agreed ? "var(--accent)" : "transparent",
+              background: agreed ? "var(--accent)" : "var(--surface)",
               transition: "all var(--t-fast) var(--ease)",
-              display: "grid",
-              placeItems: "center",
+              display: "grid", placeItems: "center",
             }}
           >
             {agreed && (
               <svg width="10" height="10" viewBox="0 0 10 10" fill="none">
-                <path d="M2 5l2 2 4-4" stroke="var(--text-inv)" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+                <path d="M2 5l2 2 4-4" stroke="white" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
               </svg>
             )}
           </div>
-          <span style={{ fontSize: "var(--text-sm)", color: "var(--text)", lineHeight: 1.6 }}>
-            I have read the above and agree to the processing of my personal and
-            biometric data for KYC verification as described.
+          <span style={{ fontSize: "var(--text-sm)", color: "var(--text)", lineHeight: 1.65 }}>
+            I have read the above and agree to the processing of my personal and biometric
+            data for KYC verification as described.
           </span>
         </label>
 
-        {/* CTA */}
-        <Button
-          fullWidth
-          size="lg"
-          loading={loading}
-          disabled={!agreed}
-          onClick={handleConsent}
-        >
+        <Button fullWidth size="lg" loading={loading} disabled={!agreed} onClick={handleConsent}>
           I agree — continue to document upload
         </Button>
 
         {error && (
-          <p
-            style={{
-              marginTop: "var(--s-4)",
-              fontSize: "var(--text-sm)",
-              color: "var(--reject)",
-              textAlign: "center",
-            }}
-          >
+          <p style={{ marginTop: "var(--s-4)", fontSize: "var(--text-sm)", color: "var(--reject)", textAlign: "center" }}>
             {error}
           </p>
         )}
 
-        <p
-          style={{
-            marginTop: "var(--s-6)",
-            fontSize: "var(--text-xs)",
-            color: "var(--text-3)",
-            lineHeight: 1.7,
-            textAlign: "center",
-          }}
-        >
+        <p style={{ marginTop: "var(--s-6)", fontSize: "var(--text-xs)", color: "var(--text-3)", lineHeight: 1.7, textAlign: "center" }}>
           Consent is logged with a timestamp for compliance purposes.
           You may withdraw consent subject to regulatory retention requirements.
         </p>

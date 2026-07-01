@@ -19,9 +19,7 @@ export default function LoginPage() {
     setError(null);
     setLoading(true);
     try {
-      if (mode === "register") {
-        await authApi.register(email, password, fullName || undefined);
-      }
+      if (mode === "register") await authApi.register(email, password, fullName || undefined);
       await authApi.login(email, password);
       router.replace("/");
     } catch (err) {
@@ -39,54 +37,74 @@ export default function LoginPage() {
         gridTemplateColumns: "1fr 1fr",
       }}
     >
-      {/* ── Left panel — product pitch ──────────────────────── */}
+      {/* ── Left — orange brand panel ─────────────────────── */}
       <div
         style={{
           position: "relative",
           overflow: "hidden",
-          background: "var(--surface)",
-          borderRight: "1px solid var(--border)",
+          background: "var(--accent)",
           padding: "var(--s-12)",
           display: "flex",
           flexDirection: "column",
           justifyContent: "space-between",
         }}
       >
-        {/* Dot texture */}
-        <div
-          aria-hidden="true"
-          style={{
-            position: "absolute",
-            inset: 0,
-            backgroundImage: "radial-gradient(circle, var(--border) 1px, transparent 1px)",
-            backgroundSize: "22px 22px",
-            maskImage: "radial-gradient(ellipse 80% 80% at 20% 60%, black 20%, transparent 80%)",
-            WebkitMaskImage: "radial-gradient(ellipse 80% 80% at 20% 60%, black 20%, transparent 80%)",
-            opacity: 0.6,
-          }}
-        />
-
-        {/* Content */}
-        <div style={{ position: "relative" }}>
-          {/* Logo mark */}
+        {/* Abstract orange shapes */}
+        <div aria-hidden="true">
           <div
             style={{
-              width: 36,
-              height: 36,
-              borderRadius: "var(--r-lg)",
-              background: "var(--accent-dim)",
-              border: "1px solid rgba(0,201,167,0.3)",
-              display: "grid",
-              placeItems: "center",
+              position: "absolute",
+              top: "-20%",
+              right: "-20%",
+              width: "70%",
+              height: "70%",
+              borderRadius: "50%",
+              background: "rgba(255,255,255,0.08)",
+            }}
+          />
+          <div
+            style={{
+              position: "absolute",
+              bottom: "-10%",
+              left: "-10%",
+              width: "50%",
+              height: "50%",
+              borderRadius: "50%",
+              background: "rgba(255,255,255,0.05)",
+            }}
+          />
+        </div>
+
+        {/* Top: logo */}
+        <div style={{ position: "relative" }}>
+          <div
+            onClick={() => router.push("/")}
+            style={{
+              display: "flex",
+              alignItems: "center",
+              gap: "var(--s-3)",
+              cursor: "pointer",
               marginBottom: "var(--s-12)",
             }}
           >
-            <svg width="18" height="18" viewBox="0 0 18 18" fill="none">
-              <rect x="1" y="1" width="6.5" height="6.5" rx="1.5" fill="var(--accent)" />
-              <rect x="10.5" y="1" width="6.5" height="6.5" rx="1.5" fill="var(--accent)" opacity="0.5" />
-              <rect x="1" y="10.5" width="6.5" height="6.5" rx="1.5" fill="var(--accent)" opacity="0.5" />
-              <rect x="10.5" y="10.5" width="6.5" height="6.5" rx="1.5" fill="var(--accent)" />
-            </svg>
+            <div
+              style={{
+                width: 32,
+                height: 32,
+                borderRadius: "var(--r-md)",
+                background: "rgba(255,255,255,0.2)",
+                display: "grid",
+                placeItems: "center",
+              }}
+            >
+              <svg width="18" height="18" viewBox="0 0 18 18" fill="none">
+                <path d="M4 9c0-2.76 2.24-5 5-5s5 2.24 5 5-2.24 5-5 5-5-2.24-5-5z" stroke="#fff" strokeWidth="1.5" />
+                <path d="M9 6.5v5M6.5 9h5" stroke="#fff" strokeWidth="1.5" strokeLinecap="round" />
+              </svg>
+            </div>
+            <span style={{ fontWeight: 800, fontSize: "var(--text-base)", color: "rgba(255,255,255,0.9)", letterSpacing: "-0.02em" }}>
+              KYC Platform
+            </span>
           </div>
 
           <h1
@@ -95,67 +113,49 @@ export default function LoginPage() {
               fontWeight: 800,
               letterSpacing: "-0.04em",
               lineHeight: 1.08,
-              color: "var(--text)",
+              color: "#FFFFFF",
               marginBottom: "var(--s-5)",
-              maxWidth: 380,
-            }}
-          >
-            Identity verification
-            {" "}
-            <span style={{ color: "var(--accent)" }}>infrastructure.</span>
-          </h1>
-
-          <p
-            style={{
-              fontSize: "var(--text-base)",
-              color: "var(--text-2)",
-              lineHeight: 1.7,
               maxWidth: 340,
             }}
           >
+            Identity verification infrastructure.
+          </h1>
+          <p style={{ fontSize: "var(--text-base)", color: "rgba(255,255,255,0.75)", lineHeight: 1.7, maxWidth: 320 }}>
             Document OCR, liveness detection, and biometric face matching —
-            backed by an immutable audit trail and compliant with RBI KYC
-            guidelines.
+            backed by an immutable audit trail. RBI-compliant, self-hosted,
+            zero paid APIs.
           </p>
         </div>
 
-        {/* Bottom stat row */}
+        {/* Bottom stats */}
         <div
           style={{
             position: "relative",
             display: "flex",
             gap: "var(--s-8)",
             paddingTop: "var(--s-8)",
-            borderTop: "1px solid var(--border)",
+            borderTop: "1px solid rgba(255,255,255,0.2)",
           }}
         >
           {[
             { value: "4", label: "Verification steps" },
             { value: "100%", label: "Self-hosted" },
-            { value: "0", label: "Paid APIs" },
-          ].map((stat) => (
-            <div key={stat.label}>
-              <p
-                style={{
-                  fontSize: "var(--text-xl)",
-                  fontWeight: 800,
-                  color: "var(--accent)",
-                  letterSpacing: "-0.03em",
-                  lineHeight: 1,
-                  marginBottom: "var(--s-1)",
-                }}
-              >
-                {stat.value}
+            { value: "₹0", label: "Per-call cost" },
+          ].map((s) => (
+            <div key={s.label}>
+              <p style={{ fontSize: "var(--text-xl)", fontWeight: 800, color: "#FFFFFF", letterSpacing: "-0.03em", lineHeight: 1 }}>
+                {s.value}
               </p>
-              <p style={{ fontSize: "var(--text-xs)", color: "var(--text-3)" }}>{stat.label}</p>
+              <p style={{ fontSize: "var(--text-xs)", color: "rgba(255,255,255,0.6)", marginTop: "var(--s-1)" }}>{s.label}</p>
             </div>
           ))}
         </div>
       </div>
 
-      {/* ── Right panel — form ───────────────────────────────── */}
+      {/* ── Right — form ──────────────────────────────────── */}
       <div
         style={{
+          background: "var(--bg)",
           display: "flex",
           flexDirection: "column",
           alignItems: "center",
@@ -168,20 +168,14 @@ export default function LoginPage() {
             style={{
               fontSize: "var(--text-2xl)",
               fontWeight: 800,
-              letterSpacing: "-0.03em",
-              marginBottom: "var(--s-2)",
+              letterSpacing: "-0.035em",
               color: "var(--text)",
+              marginBottom: "var(--s-2)",
             }}
           >
             {mode === "login" ? "Welcome back" : "Create account"}
           </h2>
-          <p
-            style={{
-              fontSize: "var(--text-sm)",
-              color: "var(--text-2)",
-              marginBottom: "var(--s-8)",
-            }}
-          >
+          <p style={{ fontSize: "var(--text-sm)", color: "var(--text-2)", marginBottom: "var(--s-8)" }}>
             {mode === "login"
               ? "Sign in to access your verification sessions."
               : "Set up your account to start verifying identities."}
@@ -200,7 +194,6 @@ export default function LoginPage() {
                 autoComplete="name"
               />
             )}
-
             <Input
               label="Email address"
               type="email"
@@ -210,7 +203,6 @@ export default function LoginPage() {
               onChange={(e) => setEmail(e.target.value)}
               autoComplete={mode === "login" ? "email" : "new-email"}
             />
-
             <Input
               label="Password"
               type="password"
@@ -222,7 +214,6 @@ export default function LoginPage() {
               autoComplete={mode === "login" ? "current-password" : "new-password"}
               error={error ?? undefined}
             />
-
             <Button type="submit" fullWidth loading={loading} size="lg" style={{ marginTop: "var(--s-2)" }}>
               {mode === "login" ? "Sign in" : "Create account"}
             </Button>
@@ -255,17 +246,13 @@ export default function LoginPage() {
         </div>
       </div>
 
-      {/* Mobile: stack vertically */}
       <style>{`
         @media (max-width: 768px) {
           div[style*="grid-template-columns: 1fr 1fr"] {
             grid-template-columns: 1fr !important;
           }
-          div[style*="border-right: 1px solid var(--border)"] {
-            border-right: none !important;
-            border-bottom: 1px solid var(--border);
-            padding: var(--s-8) !important;
-            min-height: unset !important;
+          div[style*="background: var(--accent)"][style*="justify-content: space-between"] {
+            min-height: 320px !important;
           }
         }
       `}</style>
