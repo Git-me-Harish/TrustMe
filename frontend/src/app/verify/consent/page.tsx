@@ -1,14 +1,17 @@
 "use client";
-
-import { useState } from "react";
+import React, { useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { kycApi, ApiError } from "../../../lib/api-client";
+import { Button } from "../../../components/ui/Button";
+import { StepHeader } from "../../../components/StepHeader";
+import { VerificationPipeline } from "../../../components/VerificationPipeline";
 
-const CONSENT_TEXT =
-  "I consent to the collection and processing of my biometric data " +
-  "(facial image, liveness video frames) and identity document data " +
-  "for the purpose of KYC verification. Data will be retained for " +
-  "the period required by applicable regulations (RBI Master Direction on KYC).";
+const DATA_COLLECTED = [
+  { label: "ID document photo", detail: "Used for OCR field extraction and face reference" },
+  { label: "Live video frames", detail: "Liveness challenge and passive anti-spoof scoring" },
+  { label: "Biometric embeddings", detail: "512-d ArcFace vectors — not stored as raw images" },
+  { label: "Geolocation timestamp", detail: "Session-level, not granular tracking" },
+];
 
 export default function ConsentPage() {
   const router = useRouter();
@@ -20,7 +23,16 @@ export default function ConsentPage() {
   const [error, setError] = useState<string | null>(null);
 
   if (!sessionId) {
-    return <Centered>No active session. Start verification from the home page first.</Centered>;
+    return (
+      <div className="container" style={{ paddingTop: "var(--s-16)", textAlign: "center" }}>
+        <p style={{ color: "var(--reject)", fontSize: "var(--text-base)" }}>
+          No active session. Start from the home page.
+        </p>
+        <Button variant="secondary" size="sm" style={{ marginTop: "var(--s-4)" }} onClick={() => router.push("/")}>
+          Go home
+        </Button>
+      </div>
+    );
   }
 
   async function handleConsent() {
@@ -38,105 +50,191 @@ export default function ConsentPage() {
   }
 
   return (
-    <main style={{ maxWidth: 520, margin: "0 auto", padding: "var(--space-8) var(--space-4)" }}>
-      <h1 style={{ fontSize: "var(--fs-xl)", marginBottom: "var(--space-2)" }}>
-        Before we continue
-      </h1>
-      <p style={{ color: "var(--color-text-secondary)", marginBottom: "var(--space-6)" }}>
-        As required by RBI KYC guidelines and applicable data protection law, we need
-        your explicit consent before collecting any biometric data.
-      </p>
-
+    <div
+      style={{
+        minHeight: "100dvh",
+        display: "flex",
+        flexDirection: "column",
+      }}
+    >
       <div
+        className="container"
         style={{
-          background: "var(--color-surface)",
-          border: "1px solid var(--color-border)",
-          borderRadius: "var(--radius-md)",
-          padding: "var(--space-6)",
-          marginBottom: "var(--space-6)",
-          fontSize: "var(--fs-sm)",
-          color: "var(--color-text-secondary)",
-          lineHeight: 1.7,
+          flex: 1,
+          paddingTop: "var(--s-8)",
+          paddingBottom: "var(--s-16)",
+          maxWidth: 640,
         }}
       >
-        {CONSENT_TEXT}
-      </div>
-
-      <div style={{ marginBottom: "var(--space-6)" }}>
-        <p style={{ color: "var(--color-text-secondary)", fontSize: "var(--fs-sm)", marginBottom: "var(--space-4)" }}>
-          We will collect and process:
-        </p>
-        {[
-          "A photo of your government-issued ID document",
-          "A live selfie or short video for liveness detection",
-          "Biometric facial embeddings for identity matching",
-          "OCR-extracted text fields from your document",
-        ].map((item) => (
-          <div key={item} style={{ display: "flex", gap: "var(--space-3)", marginBottom: "var(--space-2)", alignItems: "flex-start" }}>
-            <span style={{ color: "var(--color-verify)", flexShrink: 0, marginTop: 2 }}>✓</span>
-            <span style={{ color: "var(--color-text-secondary)", fontSize: "var(--fs-sm)" }}>{item}</span>
-          </div>
-        ))}
-      </div>
-
-      <label
-        style={{
-          display: "flex",
-          alignItems: "flex-start",
-          gap: "var(--space-3)",
-          marginBottom: "var(--space-6)",
-          cursor: "pointer",
-        }}
-      >
-        <input
-          type="checkbox"
-          checked={agreed}
-          onChange={(e) => setAgreed(e.target.checked)}
-          style={{ marginTop: 3, flexShrink: 0 }}
+        <VerificationPipeline status="INITIATED" />
+        <StepHeader
+          step={1}
+          totalSteps={5}
+          title="Before we collect data."
+          description="We need your explicit consent before capturing any biometric information. This is required by RBI KYC guidelines and applicable data protection law."
         />
-        <span style={{ fontSize: "var(--fs-sm)", color: "var(--color-text-primary)" }}>
-          I have read and agree to the processing of my personal and biometric data
-          for KYC verification as described above.
-        </span>
-      </label>
 
-      <button
-        onClick={handleConsent}
-        disabled={!agreed || loading}
-        style={{
-          width: "100%",
-          background: !agreed || loading ? "var(--color-border)" : "var(--color-verify)",
-          color: !agreed || loading ? "var(--color-text-muted)" : "#0b0d10",
-          border: "none",
-          borderRadius: "var(--radius-md)",
-          padding: "var(--space-3)",
-          fontSize: "var(--fs-base)",
-          cursor: !agreed || loading ? "default" : "pointer",
-          transition: "background 0.2s",
-        }}
-      >
-        {loading ? "Recording consent…" : "I agree — continue"}
-      </button>
+        {/* What we collect */}
+        <div
+          style={{
+            background: "var(--surface)",
+            border: "1px solid var(--border)",
+            borderRadius: "var(--r-xl)",
+            overflow: "hidden",
+            marginBottom: "var(--s-6)",
+          }}
+        >
+          <div
+            style={{
+              padding: "var(--s-4) var(--s-5)",
+              borderBottom: "1px solid var(--border)",
+              background: "var(--surface-2)",
+            }}
+          >
+            <p
+              style={{
+                fontSize: "var(--text-xs)",
+                fontWeight: 600,
+                letterSpacing: "0.08em",
+                textTransform: "uppercase",
+                color: "var(--text-3)",
+              }}
+            >
+              Data collected in this session
+            </p>
+          </div>
+          {DATA_COLLECTED.map((item, i) => (
+            <div
+              key={item.label}
+              style={{
+                padding: "var(--s-4) var(--s-5)",
+                borderBottom: i < DATA_COLLECTED.length - 1 ? "1px solid var(--border)" : "none",
+                display: "flex",
+                justifyContent: "space-between",
+                alignItems: "center",
+                gap: "var(--s-4)",
+              }}
+            >
+              <span style={{ fontSize: "var(--text-sm)", color: "var(--text)", fontWeight: 500 }}>
+                {item.label}
+              </span>
+              <span
+                style={{
+                  fontSize: "var(--text-xs)",
+                  color: "var(--text-3)",
+                  textAlign: "right",
+                  maxWidth: 240,
+                  lineHeight: 1.5,
+                }}
+              >
+                {item.detail}
+              </span>
+            </div>
+          ))}
+        </div>
 
-      {error && (
-        <p style={{ color: "var(--color-reject)", marginTop: "var(--space-4)", fontSize: "var(--fs-sm)" }}>
-          {error}
+        {/* Consent text */}
+        <div
+          style={{
+            background: "var(--accent-dim)",
+            border: "1px solid rgba(0,201,167,0.15)",
+            borderRadius: "var(--r-lg)",
+            padding: "var(--s-5)",
+            marginBottom: "var(--s-6)",
+          }}
+        >
+          <p
+            style={{
+              fontSize: "var(--text-sm)",
+              color: "var(--text-2)",
+              lineHeight: 1.75,
+            }}
+          >
+            I consent to the collection and processing of my biometric data (facial image,
+            liveness video frames) and identity document data for the purpose of KYC
+            verification. Data will be retained for the period required by applicable
+            regulations (RBI Master Direction on KYC — 5 years from relationship end).
+          </p>
+        </div>
+
+        {/* Checkbox */}
+        <label
+          style={{
+            display: "flex",
+            alignItems: "flex-start",
+            gap: "var(--s-3)",
+            marginBottom: "var(--s-8)",
+            cursor: "pointer",
+          }}
+        >
+          <div
+            role="checkbox"
+            aria-checked={agreed}
+            tabIndex={0}
+            onClick={() => setAgreed(!agreed)}
+            onKeyDown={(e) => e.key === " " && setAgreed(!agreed)}
+            style={{
+              width: 18,
+              height: 18,
+              marginTop: 2,
+              flexShrink: 0,
+              borderRadius: "var(--r-sm)",
+              border: `1.5px solid ${agreed ? "var(--accent)" : "var(--border-2)"}`,
+              background: agreed ? "var(--accent)" : "transparent",
+              transition: "all var(--t-fast) var(--ease)",
+              display: "grid",
+              placeItems: "center",
+            }}
+          >
+            {agreed && (
+              <svg width="10" height="10" viewBox="0 0 10 10" fill="none">
+                <path d="M2 5l2 2 4-4" stroke="var(--text-inv)" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+              </svg>
+            )}
+          </div>
+          <span style={{ fontSize: "var(--text-sm)", color: "var(--text)", lineHeight: 1.6 }}>
+            I have read the above and agree to the processing of my personal and
+            biometric data for KYC verification as described.
+          </span>
+        </label>
+
+        {/* CTA */}
+        <Button
+          fullWidth
+          size="lg"
+          loading={loading}
+          disabled={!agreed}
+          onClick={handleConsent}
+        >
+          I agree — continue to document upload
+        </Button>
+
+        {error && (
+          <p
+            style={{
+              marginTop: "var(--s-4)",
+              fontSize: "var(--text-sm)",
+              color: "var(--reject)",
+              textAlign: "center",
+            }}
+          >
+            {error}
+          </p>
+        )}
+
+        <p
+          style={{
+            marginTop: "var(--s-6)",
+            fontSize: "var(--text-xs)",
+            color: "var(--text-3)",
+            lineHeight: 1.7,
+            textAlign: "center",
+          }}
+        >
+          Consent is logged with a timestamp for compliance purposes.
+          You may withdraw consent subject to regulatory retention requirements.
         </p>
-      )}
-
-      <p style={{ color: "var(--color-text-muted)", fontSize: "var(--fs-xs)", marginTop: "var(--space-6)", lineHeight: 1.6 }}>
-        Your consent is logged with a timestamp for compliance purposes.
-        You may withdraw consent at any time by contacting us, subject to
-        regulatory retention requirements.
-      </p>
-    </main>
-  );
-}
-
-function Centered({ children }: { children: React.ReactNode }) {
-  return (
-    <main style={{ maxWidth: 520, margin: "0 auto", padding: "var(--space-8) var(--space-4)" }}>
-      <p style={{ color: "var(--color-reject)" }}>{children}</p>
-    </main>
+      </div>
+    </div>
   );
 }

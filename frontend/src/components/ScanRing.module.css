@@ -1,0 +1,88 @@
+/* Biometric scan ring — the platform's signature UI element.
+   Used on any page that captures live camera input. */
+
+.wrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Corner bracket decorations — camera viewfinder aesthetic */
+.brackets {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+
+.bracket {
+  position: absolute;
+  width: 20px;
+  height: 20px;
+  border-color: var(--accent);
+  border-style: solid;
+  opacity: 0.7;
+}
+
+.bracket-tl { top: 0; left: 0; border-width: 2px 0 0 2px; }
+.bracket-tr { top: 0; right: 0; border-width: 2px 2px 0 0; }
+.bracket-bl { bottom: 0; left: 0; border-width: 0 0 2px 2px; }
+.bracket-br { bottom: 0; right: 0; border-width: 0 2px 2px 0; }
+
+/* Pulsing outer ring */
+.ring {
+  position: absolute;
+  inset: -10px;
+  border-radius: 50%;
+  border: 1.5px solid var(--accent);
+  animation: pulse-ring 2.5s var(--ease) infinite;
+}
+
+/* Expanding scan ring */
+.ring-expand {
+  position: absolute;
+  inset: -10px;
+  border-radius: 50%;
+  border: 1px solid var(--accent);
+  animation: scan-expand 2.5s var(--ease) infinite;
+  animation-delay: 0.4s;
+}
+
+/* Active state — brightens rings */
+.wrapper[data-active="true"] .ring { opacity: 1; }
+.wrapper[data-active="false"] .ring { opacity: 0.3; animation: none; }
+.wrapper[data-active="false"] .ring-expand { opacity: 0; }
+
+/* Scanning line — vertical sweep */
+.scan-line {
+  position: absolute;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    var(--accent-glow) 20%,
+    var(--accent) 50%,
+    var(--accent-glow) 80%,
+    transparent 100%
+  );
+  animation: scan-sweep 2s ease-in-out infinite;
+  pointer-events: none;
+  border-radius: var(--r-full);
+}
+
+@keyframes scan-sweep {
+  0%   { top: 10%; opacity: 0; }
+  10%  { opacity: 1; }
+  90%  { opacity: 1; }
+  100% { top: 90%; opacity: 0; }
+}
+
+/* Inner content area */
+.inner {
+  position: relative;
+  border-radius: var(--r-lg);
+  overflow: hidden;
+  background: var(--surface-2);
+}
